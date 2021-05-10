@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<robot xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+        xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface"
+        xmlns:xacro="http://wiki.ros.org/xacro"
+        xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+        name="MiR200_UR5">
+
+    <xacro:arg name="robot_name" default=''/>
+    <xacro:arg name="tf_prefix" default=''/>
+    <xacro:arg name="robot_namespace" default=''/>
+    <!--old: <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/> -->
+    <xacro:arg name="transmission_hw_interface1" default="hardware_interface/PositionJointInterface"/>
+    <xacro:arg name="transmission_hw_interface2" default="hardware_interface/VelocityJointInterface"/>
+
+    <!--Include all needed urdf files-->
+    <!-- <xacro:include filename="$(find mir_ur5_description)/urdf/mir_200_v1.urdf.xacro"/> -->
+
+    <!-- <xacro:include filename="$(find mir_ur5_description)/urdf/ur5.urdf.xacro"/> -->
+    <xacro:include filename="$(find cartesian_controller_examples)/urdf/ur5_robot.urdf.xacro">
+        <xacro:arg name="tf_prefix" value="$(arg tf_prefix)"/>
+    </xacro:include>
+
+    <!-- <xacro:mir_200 prefix="$(arg tf_prefix)"/> -->
+
+    <!--The position of the model was measured using laser scachild_frame="$(arg tf_prefix)wrist_3_link_ur5" nner. See Florian's master thesis-->
+    <!-- <joint name="robot_to_ur5" type="fixed">
+      <parent link="$(arg tf_prefix)base_link"/>
+      <child link="$(arg tf_prefix)base_link_ur5"/>
+      <origin xyz="0.244311 -0.140242 0.450477" rpy="0.0 0.0 0.0"/>
+    </joint> -->
+
+    <!--add force_torque sensor-->
+    <!-- <xacro:include filename="$(find mir_ur5_description)/urdf/include/force_sensor.gazebo.xacro" />
+    <xacro:sensor_force_torque joint_name="$(arg tf_prefix)wrist_3_joint" topic_name="ee_force_torque_sensor"/> old: $(arg tf_prefix)ee_link_ur5 -->
+
+    <!--Link to Gazebo library-->
+    <!-- <xacro:property name="joint_names" value="$(arg tf_prefix)shoulder_pan_joint $(arg tf_prefix)shoulder_lift_joint $(arg tf_prefix)elbow_joint $(arg tf_prefix)wrist_1_joint $(arg tf_prefix)wrist_2_joint $(arg tf_prefix)wrist_3_joint $(arg tf_prefix)tool_joint_ur5" /> -->
+
+   <!-- old -->
+   <!--<gazebo>
+        <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <controlPeriod>0.001</controlPeriod>
+            <legacyModeNS>true</legacyModeNS>
+        </plugin>
+    </gazebo>-->
+   <!-- new -->
+    
+    <gazebo>
+      <plugin name="gazebo_ros_control" filename="libhwi_switch_gazebo_ros_control.so">
+        <!-- <robotNamespace>$(arg robot_namespace)</robotNamespace> --> <!--will be global namespace when not specified-->
+        <controlPeriod>0.001</controlPeriod>
+        <legacyModeNS>true</legacyModeNS>
+        <!--<filterJointsParam>${joint_names}</filterJointsParam>-->
+      </plugin>
+    </gazebo>
+    
+   
+
+    <!-- Either use the part in the <gazebo> tags or the following -->
+    <!-- <xacro:diff_controller_plugin_gazebo prefix=""
+        left_wheel_joint="left_wheel_joint"
+        right_wheel_joint="right_wheel_joint"
+        wheel_separation="${2*mir_200_act_wheel_dy}"
+        wheel_radius="${mir_200_act_wheel_radius}"/> -->
+</robot>

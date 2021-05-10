@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name="r" value="0.23"/>
+    <xacro:property name="h" value="0.12"/>
+    <xacro:property name="m" value="0.25"/>
+   
+    <xacro:macro name="cube_body">
+        <material name="Green">
+            <color rgba="0.0 0.8 0.0 1.0"/>
+        </material>
+        <material name="yellow">
+            <color rgba="1 0.4 0 1"/>
+        </material>
+        <material name="black">
+            <color rgba="0 0 0 0.95"/>
+        </material>
+        <material name="gray">
+            <color rgba="0.75 0.75 0.75 1"/>
+        </material>
+
+      
+        <link name="cube">
+            <inertial>
+                <mass value="${m}" />
+                <origin xyz="0 0 0.0" />
+                <inertia  ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
+                  iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
+                  izz="${m*r*r/2}" /> 
+            </inertial>
+            <visual>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="${h}" radius="${r}"/>
+                </geometry>
+                <material name="gray" />
+            </visual>
+
+            <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <cylinder length="${h}" radius="${r}"/>
+                </geometry>
+            </collision>
+        </link>
+
+        <!-- <joint name="base_footprint_joint" type="fixed">
+            <origin xyz="0 0 ${wheel_radius}" rpy="0 0 0" />        
+            <parent link="base_footprint"/>
+            <child link="base_link" />
+        </joint> -->
+    
+       
+
+
+    </xacro:macro>
+
+</robot>

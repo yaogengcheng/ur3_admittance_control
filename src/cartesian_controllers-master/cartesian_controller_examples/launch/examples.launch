@@ -1,0 +1,102 @@
+<launch>
+        <!-- Load robot_description to parameter server -->
+<!--        
+        <include file="$(find ur3_moveit_config)/launch/planning_context.launch">
+          <arg name="load_robot_description" value="true"/>
+     
+        </include> -->
+ <!-- send robot urdf to param server -->
+
+  <!-- <include file="$(find ur_description)/launch/ur3_upload.launch">
+    <arg name="limited" value="false"/>
+  </include> -->
+
+   <!-- Load hardware configuration -->
+        <rosparam file="$(find cartesian_controller_examples)/config/example_hw_config.yaml" command="load"></rosparam>
+       <rosparam file="$(find cartesian_controller_examples)/config/gazebo_ros_controller_params.yaml" command="load"/>
+
+        <!-- Load hardware interface -->
+        <node name="sim_hardware_interface" pkg="ros_control_boilerplate" type="sim_hw_main"
+        output="screen" />
+        
+   <!-- <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="paused" value="false" />
+      <arg name="debug" value="0" />
+      <arg name="gui" value="true" />
+      <arg name="use_sim_time" value="true" />
+      <arg name="headless" value="false" />
+      <arg name="world_name" value="worlds/empty.world" />
+    </include> -->
+
+       <!-- Robot state publisher -->
+        <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+                <param name="publish_frequency" type="double" value="50.0" />
+                <param name="tf_prefix" type="string" value="" />
+        </node>
+        
+      <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find ur_description)/urdf/ur3_robot.urdf.xacro'" /> 
+
+        <node pkg="rostopic" type="rostopic" name="fake_joint_calibration"
+        args="pub /calibrated std_msgs/Bool true" />
+
+
+       <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-urdf -model ur3 -param robot_description -x 0 -y 0 -z 0" />
+       
+      
+        
+         <!-- <include file="$(find cartesian_controller_examples)/launch/cartesian_gazebo.launch">
+        </include> -->
+        <!-- Launch Gazebo with the specified world -->
+
+    
+   
+        <!-- Load controller configuration -->
+        <rosparam file="$(find cartesian_controller_examples)/config/example_controllers.yaml" command="load"></rosparam>
+
+        <!-- Joint state publisher -->
+        <node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" args=" joint_state_controller" respawn="false" output="screen"/>
+        <!-- <node name="joint_state_controller_spawner" pkg="controller_manager"
+      type="controller_manager" args="load joint_state_controller" respawn="false" output="screen"/>
+        <node name="arm_controller_spawner" pkg="controller_manager"
+      type="controller_manager" args="load my_cartesian_motion_controller my_motion_control_handle"
+      respawn="false" output="screen"/> -->
+        <!-- Spawn controllers -->
+        <node name="controller_spawner" pkg="controller_manager" type="spawner"
+                args="
+                my_cartesian_motion_controller
+                my_motion_control_handle
+                "/>
+
+        <!-- Spawn joint controller for testing my_joint_to_cartesian_controller  -->
+        <!-- Note: This controller should be loaded and started -->
+        <group ns="my_joint_to_cartesian_controller" >
+                <node name="controller_spawner" pkg="controller_manager" type="spawner" args="joint_trajectory_controller" />
+        </group>
+
+         <arg name="limited" default="false"/>
+         <arg name="debug" default="false" />
+
+         <!-- Remap follow_joint_trajectory -->
+         <!-- remap from="/follow_joint_trajectory" to="/vel_based_pos_traj_controller/follow_joint_trajectory"/ -->
+         <!-- <remap from="/follow_joint_trajectory" to="/compliance_controller/follow_joint_trajectory"/> -->
+
+         <!-- Launch moveit -->
+         <!-- <include file="$(find ur3_moveit_config)/launch/move_group.launch">
+            <arg name="allow_trajectory_execution" value="true"/>  
+            <arg name="fake_execution" value="true"/>
+            <arg name="info" value="true"/>
+            <arg name="debug" value="false"/>
+        </include> -->
+
+        <!-- Visualization -->
+        <arg name="my_rviz" value="-d $(find cartesian_controller_examples)/etc/examples.rviz" />
+        <node name="rviz" pkg="rviz" type="rviz" respawn="false" args="$(arg my_rviz)" output="screen" >
+        </node>
+
+
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <!-- <node name="spawn_gazebo_model" pkg="gazebo_ros" type="spawn_model" args="-urdf -param robot_description -model robot -z 0.1" respawn="false" output="screen" /> -->
+
+ 
+
+</launch>

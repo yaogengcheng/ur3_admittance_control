@@ -1,0 +1,23 @@
+<launch>
+<!-- Launch Gazebo with the specified world -->
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="paused" value="true" />
+      <arg name="debug" value="0" />
+      <arg name="gui" value="true" />
+      <arg name="use_sim_time" value="true" />
+      <arg name="headless" value="false" />
+      <arg name="world_name" value="worlds/empty.world" />
+      
+    </include>
+    <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find ur_description)/urdf/ur3_robot.urdf.xacro'" /> 
+    <rosparam file="$(find cartesian_controller_examples)/config/gazebo_ros_controller_params.yaml" command="load"/>
+
+      <!-- Fake Calibration -->
+  <node pkg="rostopic" type="rostopic" name="fake_joint_calibration"
+        args="pub /calibrated std_msgs/Bool true" />
+<!-- push robot_description to factory and spawn robot in gazebo -->
+   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -model ur3 -param robot_description -x 0 -y 0 -z 0" />
+
+    
+</launch>

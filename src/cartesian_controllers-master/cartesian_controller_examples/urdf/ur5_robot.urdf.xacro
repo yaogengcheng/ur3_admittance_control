@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!-- This file is needed so the moveit configurator is able to use the robot only (because the "xacro:ur5_robot" is searched) -->
+<robot xmlns:xacro="http://wiki.ros.org/xacro"
+       name="ur5" >
+
+  <!-- old: <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/> -->
+  <xacro:arg name="transmission_hw_interface1" default="hardware_interface/PositionJointInterface"/>
+  <xacro:arg name="transmission_hw_interface2" default="hardware_interface/VelocityJointInterface"/>
+  <xacro:arg name="tf_prefix" default=''/>
+
+  <!-- common stuff -->
+  <!-- <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" /> -->
+
+  <!-- include of the xacro file -->
+  <xacro:include filename="$(find cartesian_controller_examples)/urdf/ur3.urdf.xacro" />
+
+  <!-- arm -->
+  <xacro:ur3_robot prefix="$(arg tf_prefix)" joint_limited="true" transmission_hw_interface1="$(arg transmission_hw_interface1)" transmission_hw_interface2="$(arg transmission_hw_interface2)"/>
+  <!--As MoveIt! seems to have difficulties with finding plans for the UR with full joint limits [-2pi, 2pi], 
+  there is a joint_limited version using joint limits restricted to [-pi,pi]. In order to use this joint limited version set joint_limited="true"-->
+
+  <!-- <link name="world" />
+
+  <joint name="world_joint" type="fixed">
+    <parent link="world" />
+    <child link = "base_link_ur5" />
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  </joint> -->
+</robot>

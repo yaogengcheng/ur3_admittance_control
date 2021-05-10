@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+
+<launch>
+
+  <!-- 延时之后,开始通过脚本初始化机器人位姿 -->
+  <!-- <rosparam file="$(find ur5_bringup)/config/initial_pose.yaml" command="load"/> -->
+  <arg name = "mode" default = "0"/> 
+  <!-- 0:arm_controller to compliance controller; 1: compliance controller to arm controller -->
+  <param name = "controller_mode" value = "$(arg mode)"/>
+  
+  <node name="switch_controller" pkg="ur5_admittance_control" type="switch_controller.py" output="screen"/>
+
+  <!-- SET INITIAL POSE -->
+  <!-- <node name="send_target_wrench" pkg="ur5_admittance_control" type="send_target_wrench.py" output="screen"/>
+
+  <node name="send_fake_wrench" pkg="ur5_admittance_control" type="send_fake_wrench.py" output="screen"/>
+  
+  <node name="MotionTest" pkg="ur5_admittance_control" type="MotionTest.py" output="screen"/> -->
+
+</launch>

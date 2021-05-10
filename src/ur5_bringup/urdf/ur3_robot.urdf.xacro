@@ -1,0 +1,69 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro"
+       name="ur3" >
+
+  <xacro:arg name="transmission_hw_interface" default="hardware_interface/PositionJointInterface"/>
+
+  <!-- common stuff -->
+  <xacro:include filename="$(find ur_description)/urdf/common.gazebo.xacro" />
+
+  <!-- ur3 -->
+  <xacro:include filename="$(find ur5_bringup)/urdf/ur3.urdf.xacro" />
+
+
+  <!-- <xacro:include filename="$(find ur5_bringup)/urdf/cube_body.urdf.xacro" /> -->
+
+  
+  <xacro:ur3_robot prefix="" joint_limited="false"
+    transmission_hw_interface="$(arg transmission_hw_interface)"
+  />
+
+   <!-- <cube_body/> -->
+    
+  <link name="world" />
+
+  <joint name="world_joint" type="fixed">
+    <parent link="world" />
+    <child link = "base_link" />
+    <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+  </joint>
+
+
+
+
+  <!-- <joint name = "deskToWorld" type = "fixed">
+    <origin xyz= "0 0.43 0.2" rpy = "0 0 0"/>
+    <parent link = "world"/>
+    <child link = "cube"/>
+  </joint> -->
+
+
+   <!-- <link name="plane">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="0.40 0.545 0.61" />
+                </geometry>
+                <material name="gray" >
+                  <color rgba="0.75 0.75 0.75 1"/>
+                </material>
+            </visual>
+             <collision>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="0.40 0.545 0.61" />
+                </geometry>
+            </collision>
+  </link>
+
+  <joint name = "planeToWorld" type = "fixed">
+    <origin xyz= "0 0 0.305" rpy = "0 0 0"/>
+    <parent link = "world"/>
+    <child link = "plane"/>
+  </joint> -->
+
+  
+
+
+
+</robot>
