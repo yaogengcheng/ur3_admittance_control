@@ -13,19 +13,7 @@
     <node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" 
       args="0 0 0 0 0 0 1 world base_link 7" />
 
-    <!-- F/T sensor -->
-    <!-- ********REAL WRENCH from F/T sensor********************** -->
-    <!-- <include if="$(arg F/T_sensor)" file="$(find ati_sensor)/launch/ft_sensor.launch"/> -->
-    <!-- ********REAL WRENCH from F/T sensor********************** -->
-
-    <!-- FT sensor -->
-    <!-- 注意/admittance_control/wrench下面的数据格式是/admittance_control/wrench/wrench/force or torque -->
-    <!-- <node name="ft_sensor_node" pkg="ati_sensor" 
-      type="ft_sensor_node" respawn="true" output="screen" >
-    </node> -->
-
-    <!-- Bias the F/T sensor at startup -->
-    
+   
   <arg name="min_payload"  default="0.0"/>
   <arg name="max_payload"  default="3.0"/>
   <arg name="prefix" default="" />
@@ -36,7 +24,7 @@
   <node name="rviz" pkg="rviz" type="rviz" >
     </node>
   
-  <node name="FT_300_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" ></node>
+  <!-- <node name="FT_300_sensor" pkg="robotiq_ft_sensor" type="rq_sensor" ></node> -->
 
   <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find ur5_bringup)/urdf/ur3_robot.urdf.xacro'" />
 
@@ -69,13 +57,25 @@
       interface to gazebo -->
     <rosparam file="$(find ur5_bringup)/controllers/ur5_vel_controller.yaml" command="load"/>
     <node name="arm_controller_spawner" pkg="controller_manager"
-        type="controller_manager" args="spawn arm_controller"
+        type="controller_manager" args="load arm_controller"
         respawn="false" output="screen"/>
-   <!-- <node name="arm_controller_stopped" pkg="controller_manager"
-      type="controller_manager" args="load my_cartesian_force_controller"
-      respawn="false" output="screen"/> -->
+   <node name="arm_controller_stopped" pkg="controller_manager"
+      type="controller_manager" args="spawn my_cartesian_motion_controller"
+      respawn="false" output="screen"/> 
     <include file="$(find ur5_admittance_control)/launch/ur_move_group.launch">
-    </include> 
+    </include>   
+
+     <!-- F/T sensor -->
+    <!-- ********REAL WRENCH from F/T sensor********************** -->
+    <include if="$(arg F/T_sensor)" file="$(find netft_rdt_driver)/launch/ft_sensor.launch"/>
+
+    <!-- ********To initial pose and bias the force sensor********************** -->
+    <node name="initial_pose" pkg="ur5_admittance_control" type="InitialPose.py" output="screen"/>
+    <node pkg ="rosservice" type ="rosservice" name ="bias" args="call --wait /ft_sensor/bias_cmd &quot; cmd: 'bias'&quot; "/>
+    <!-- rosservice call /ft_sensor/bias_cmd "cmd: 'bias'" -->
+    
+    <!-- public the calibrated force data -->
+    <node name="force_publish" pkg="ur5_admittance_control" type="send_fake_wrench.py" output="screen"/>
   </group>
   <!-- **************************REAL ROBOT***************************** -->
 
@@ -121,7 +121,7 @@
       type="controller_manager" args="load my_cartesian_force_controller"
       respawn="false" output="screen"/> -->
     <node name="arm_controller_spawner" pkg="controller_manager"
-      type="controller_manager" args="load arm_controller"
+      type="controller_manager" args="load arm_controller my_cartesian_motion_controller "
       respawn="false" output="screen"/>
 
 

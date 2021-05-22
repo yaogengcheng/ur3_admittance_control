@@ -8,6 +8,7 @@ from geometry_msgs.msg import Pose, Point, Quaternion
 import numpy as np
 
 from geometry_msgs.msg import WrenchStamped
+from scipy.spatial.transform import Rotation as R
 
 class FakeWrenchSend():
     def __init__(self):
@@ -18,8 +19,9 @@ class FakeWrenchSend():
         rospy.Subscriber("/ft_sensor/netft_data", WrenchStamped, self.forceCallback)
         self.rate = rospy.Rate(100)
         self.target_wrench = WrenchStamped()
-        self.tool_gravity = np.array([-0.0365275,0.0993768,-3.86211])
-        self.sensor_zero = np.array([-0.0149755,0.0419408, -3.89671])
+        self.tool_gravity = np.array([-0.0477138,0.0260671,-3.84994])
+        self.sensor_zero = np.array([-0.0524807,0.0202237,-3.84746])
+
 
     def forceCallback(self,data):
   
@@ -49,7 +51,30 @@ class FakeWrenchSend():
         except tf.Exception as e:
             rospy.logwarn("{}".format(e))
             return None   
-        print(self.Rotation_matrix)
+        # print(pos)
+        # print(rot)
+        # print(self.Rotation_matrix)
+
+    def print_transform_matrix(self):
+        try:
+            self.tf_listener.waitForTransform(
+                "base_link",
+                "ee_link",
+                rospy.Time(0),
+                timeout=rospy.Duration(1),
+                polling_sleep_duration=rospy.Duration(0.1)
+                )
+            pos,rot = self.tf_listener.lookupTransform(
+                "base_link",
+                "ee_link",
+                rospy.Time(0))
+            self.Rotation_matrix = self.quaternion_to_rotation_matrix(rot) 
+        except tf.Exception as e:
+            rospy.logwarn("{}".format(e))
+            return None   
+        print(pos)
+        print(rot)
+        # print(self.Rotation_matrix)
 
     def quaternion_to_rotation_matrix(self,q):  # x, y ,z ,w
         rot_matrix = np.array(
@@ -81,7 +106,7 @@ class FakeWrenchSend():
 if __name__ == '__main__':
     try:
         node = FakeWrenchSend()
-        # node.get_transform_matrix()
+        # node.print_transform_matrix()
         while not rospy.is_shutdown():
             node.pub.publish(node.target_wrench)
             

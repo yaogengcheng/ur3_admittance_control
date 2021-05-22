@@ -34,7 +34,7 @@ class WrenchSend():
         self.target_wrench.header.frame_id = ''
         self.target_wrench.wrench.force.x = 0
         self.target_wrench.wrench.force.y = 0
-        self.target_wrench.wrench.force.z = 2
+        self.target_wrench.wrench.force.z = 0
 
         self.target_wrench.wrench.torque.x =0
         self.target_wrench.wrench.torque.y =0

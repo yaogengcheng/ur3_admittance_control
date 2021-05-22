@@ -21,6 +21,21 @@ try:
                             '/controller_manager/switch_controller', SwitchController)
         ret = switch_controller(['arm_controller'], 
                                 ['my_cartesian_compliance_controller'], 2)
+    if controller_mode == 2:
+
+
+        switch_controller = rospy.ServiceProxy(
+                            '/controller_manager/switch_controller', SwitchController)
+        ret = switch_controller(['arm_controller'], 
+                                ['my_cartesian_motion_controller'], 2)
+    
+    if controller_mode == 3:
+
+
+        switch_controller = rospy.ServiceProxy(
+                            '/controller_manager/switch_controller', SwitchController)
+        ret = switch_controller(['my_cartesian_motion_controller'], 
+                                ['arm_controller'], 2)
 
 except rospy.ServiceException, e:
     print "Service call failed: %s"%e

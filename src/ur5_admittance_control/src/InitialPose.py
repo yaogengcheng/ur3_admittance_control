@@ -17,17 +17,14 @@ if sys.version > '3':
 else:
     import Queue 
 
-class MotionTest():
+class initialPose():
     def __init__(self):
 
         rospy.init_node('talker', anonymous=True)
         self.tf_listener = tf.TransformListener()
         self.pub = rospy.Publisher('/my_cartesian_motion_controller/target_frame',PoseStamped, queue_size=3)
-        rospy.Subscriber("/my_cartesian_force_controller/ft_sensor_wrench", WrenchStamped, self.forceCallback)
         self.total_wrench = 5
         self.q = Queue.Queue(maxsize=0)
-        # t1 = threading.Thread(target=self.connect_server)
-        # t1.start()
         self.R = threading.Lock()
         self.rate = rospy.Rate(100)
         self.forceJudgeStart = False
@@ -49,36 +46,7 @@ class MotionTest():
         data = "0.052003436415528445 0.3147654951162265 0.3136344705861339 -0.35354257881860196 0.6123754446634613 0.35355443813683707 0.6123750640002141"
         res =list(map(float, data.strip().split()))
         self.q.put(res)
-        data = "-0.17717377910067827 0.4050774555404048 0.2006210893186674 -0.17747670667733628 0.8284618113788571 0.4564687929479293 0.2716418353981762"
-        res =list(map(float, data.strip().split()))
-        self.q.put(res)
-        data = "-0.18984737311234284 0.344850473075425 0.2101062611060021 -0.13111734260233388 0.8028691090658835 0.4974692246124217 0.30122052841758973"
-        res =list(map(float, data.strip().split()))
-        self.q.put(res)
-        data = "-0.22274431207804146 0.2704907297973187 0.20540778388273195 0.0902137463168064 0.808465993614266 0.3968361659076245 0.42516499688064757"
-        res =list(map(float, data.strip().split()))
-        self.q.put(res)
-
-    def connect_server(self):
         
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(('127.0.0.1', 8999))
-        while True:
-            data = s.recv(1024)
-            if len(data)>0:
-                res =list(map(float, data.strip().split()))
-                # print(res) 
-                if len(res)==7:
-                    self.q.put(res)
-                else:
-                    print("==========receive data length error=============")
-        # 关闭 socket
-        s.close()
-
-    def forceCallback(self,data):
-        self.total_wrench = math.sqrt(math.pow(data.wrench.force.x,2)+math.pow(data.wrench.force.y,2)+math.pow(data.wrench.force.z,2))
-        print("=============total wrench==============:")
-        print(self.total_wrench)
 
     def talker(self):
         if self.q.not_empty:
@@ -120,15 +88,7 @@ class MotionTest():
         # self.radio=100
         for i in range(1,self.radio+1):
             if not rospy.is_shutdown():
-                if self.q.qsize<3 and self.count%1 == 0 and (self.total_wrench<4 or self.total_wrench>8):
-                    # print("jinru")
-                    while (self.total_wrench<4 or self.total_wrench>8) and not rospy.is_shutdown(): 
-                        self.send_ee_link_pose()
-                    self.count=0
-                    self.pathPlan()
-                    break
-            # if self.total_wrench<6:
-                self.count+=1
+               
                 self.target_Pose_goal.pose.position.x += (self.next_Pose_goal.pose.position.x - self.Pose_goal.pose.position.x)/self.radio
                 self.target_Pose_goal.pose.position.y += (self.next_Pose_goal.pose.position.y - self.Pose_goal.pose.position.y)/self.radio
                 self.target_Pose_goal.pose.position.z += (self.next_Pose_goal.pose.position.z - self.Pose_goal.pose.position.z)/self.radio
@@ -170,18 +130,6 @@ class MotionTest():
         Target_pose.orientation.w = Pose_goal.w*k0 + next_Pose_goal.w*k1
         return Target_pose.orientation
     
-    # def quaternion2euler(self,quaternion):
-    #     x = quaternion.x
-    #     y = quaternion.y
-    #     z = quaternion.z
-    #     w = quaternion.w
-    #     r = math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y))
-    #     r = r / math.pi * 180
-    #     p = math.asin(2 * (w * y - z * x))
-    #     p = p / math.pi * 180
-    #     y = math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
-    #     y = y / math.pi * 180
-    #     return r,p,y
 
     def get_end_effector_pose(self):
         try:
@@ -237,9 +185,8 @@ class MotionTest():
 
 if __name__ == '__main__':
     try:
-        node = MotionTest()
-        while not rospy.is_shutdown():
-            node.talker()
+        node = initialPose()
+        node.talker()
             # node.send_ee_link_pose()
             # node.get_end_effector_pose()
     except rospy.ROSInterruptException:
