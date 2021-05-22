@@ -1,0 +1,32 @@
+NOTE：每次终端记得source
+
+FT300 sernsor (package:ur3_admitControl):
+========start FtT300========================:
+rosrun robotiq_ft_sensor rq_sensor
+rosrun robotiq_ft_sensor rq_test_sensor
+
+========force control for b-scan============:
+
+In package ur3_admitControl:
+roslaunch ur5_bringup ur5_bringup.launch(ur5之前写错了其实就是ur3懒得改了)
+注意在ur5_bringup.launch中，有一个回到初始位置的代码，等机器人到达初始位置后，再运行下面的bias
+rosservice call /ft_sensor/bias_cmd "cmd: 'bias'"
+
+=========calibrate nano sensor===============:
+
+先运行ur3_admitControl下的：
+roslaunch ur5_bringup ur5_bringup.launch
+rosservice call /ft_sensor/bias_cmd "cmd: 'bias'"
+roslaunch ur5_admittance_control ur_simulation.launch mode:=2
+再运行包 ygc_ur下的:
+rosrun ur3_moveit FT_sensor_calibration（这里为什么放在两个包，因为懒得换回来了）
+终端会输出cali_bias:
+将cali_bias中六个数复制到send_fake_wrench.py中，替换tool_gravity sensor_zero
+
+
+===========switch controller=====================
+
+如果想用原先的arm_controller,可以执行：
+roslaunch ur5_admittance_control ur_simulation.launch mode:=1(2:mycartesion_motion_controller>>arm_controller
+                                           		      3:arm_controller>>mycartesion_motion_controller)
+还有其他控制器，可以看github
